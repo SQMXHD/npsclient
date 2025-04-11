@@ -39,7 +39,7 @@ A NPC client for Android.
 
 ---
 
-## 📚 References / 参考项目
+## References / 参考项目
 
 - [AceDroidX/frp-Android](https://github.com/AceDroidX/frp-Android)
 - [djylb/nps](https://github.com/djylb/nps)
