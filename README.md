@@ -4,11 +4,16 @@ A NPC client for Android.
 
 一个用于 Android 的 NPC 客户端。
 
----
-
 > 该应用仅在NPC代码发生变更时更新，不会追随NPS版本号更新
 
-## 📦 How to Use / 使用方法
+---
+
+## Install / 安装
+- [Google Play](https://play.google.com/store/apps/details?id=com.duanlab.npsclient)
+- [Releases](https://github.com/djylb/npsclient/releases/latest)
+
+
+## How to Build / 编译方法
 
 1. Download the NPC binary for your target architecture from [NPS](https://github.com/djylb/nps).
 
