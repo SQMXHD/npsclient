@@ -1,4 +1,4 @@
-# npsclient
+# NPS Client
 
 A NPC client for Android.
 
