@@ -1,6 +1,6 @@
-val appVersionCode = 3
-val appVersionName = "1.0.2"
-val npsVersion = "0.26.45"
+val appVersionCode = 1
+val appVersionName = "1.0.0"
+val npsVersion = "0.26.44"
 val npcFileName = "libnpc.so"
 
 plugins {

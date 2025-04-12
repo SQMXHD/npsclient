@@ -22,7 +22,7 @@ jobs:
       run: |
         current_nps_version=$(grep -oP '^val npsVersion = "\K[0-9\.]+' app/build.gradle.kts | xargs)
         echo "Current NPS version: '$current_nps_version'"
-        echo "CURRENT_VERSION=$latest_version" >> $GITHUB_ENV
+        echo "CURRENT_VERSION=$current_nps_version" >> $GITHUB_ENV
 
         latest_version=$(curl --silent "https://api.github.com/repos/djylb/nps/releases/latest" | jq -r .tag_name)
         latest_version_no_v=$(echo "$latest_version" | sed 's/^v//' | xargs)
@@ -87,7 +87,7 @@ jobs:
       run: |
         git config --global user.name "djylb"
         git config --global user.email "duan@d-jy.net"
-        git add app/build.gradle.kts app/src/main/jniLibs/*
+        git add app/src/main/jniLibs/*
 
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
