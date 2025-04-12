@@ -18,14 +18,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y wget tar jq
 
-    - name: Get nps version
+    - name: Get NPS version
       run: |
         current_nps_version=$(grep -oP '^val npsVersion = "\K[0-9\.]+' app/build.gradle.kts | xargs)
         echo "Current NPS version: '$current_nps_version'"
         echo "CURRENT_VERSION=$latest_version" >> $GITHUB_ENV
 
         latest_version=$(curl --silent "https://api.github.com/repos/djylb/nps/releases/latest" | jq -r .tag_name)
-	latest_version_no_v=$(echo "$latest_version" | sed 's/^v//' | xargs)
+        latest_version_no_v=$(echo "$latest_version" | sed 's/^v//' | xargs)
         echo "Latest NPS version: $latest_version_no_v"
         echo "LATEST_VERSION=$latest_version_no_v" >> $GITHUB_ENV
 
