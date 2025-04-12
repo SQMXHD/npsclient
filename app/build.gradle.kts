@@ -1,3 +1,8 @@
+val appVersionCode = 1
+val appVersionName = "1.0.0"
+val npsVersion = "0.26.44"
+val npcFileName = "libnpc.so"
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,13 +18,13 @@ android {
         applicationId = "com.duanlab.npsclient"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "NpsVersion", "\"0.26.44\"")
-        buildConfigField("String", "NpcFileName", "\"libnpc.so\"")
+        buildConfigField("String", "NpsVersion", "\"$npsVersion\"")
+        buildConfigField("String", "NpcFileName", "\"$npcFileName\"")
     }
 
     buildTypes {

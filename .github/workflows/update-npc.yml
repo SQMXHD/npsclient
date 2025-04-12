@@ -18,43 +18,43 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y wget tar jq
 
-    - name: Get latest version from djylb/nps
+    - name: Get nps version
       run: |
+        current_nps_version=$(grep -oP '^val npsVersion = "\K[0-9\.]+' app/build.gradle.kts | xargs)
+        echo "Current NPS version: '$current_nps_version'"
+        echo "CURRENT_VERSION=$latest_version" >> $GITHUB_ENV
+
         latest_version=$(curl --silent "https://api.github.com/repos/djylb/nps/releases/latest" | jq -r .tag_name)
-        echo "Latest version: $latest_version"
-        echo "LATEST_VERSION=$latest_version" >> $GITHUB_ENV
+	latest_version_no_v=$(echo "$latest_version" | sed 's/^v//' | xargs)
+        echo "Latest NPS version: $latest_version_no_v"
+        echo "LATEST_VERSION=$latest_version_no_v" >> $GITHUB_ENV
 
-    - name: Check if update is needed
-      run: |
-        # Extract current version from build.gradle.kts
-        current_version=$(grep -oP 'buildConfigField\("String", "NpsVersion", "\K[0-9\.]+' app/build.gradle.kts)
-        echo "Current version from build.gradle.kts: $current_version"
-
-        # Strip the 'v' from latest_version if it exists
-        latest_version_no_v=$(echo "$LATEST_VERSION" | sed 's/^v//')
-        echo "Latest version: $latest_version_no_v"
-
-        if [ "$current_version" == "$latest_version_no_v" ]; then
-          echo "No update needed. The latest version is already installed."
-          exit 0
-        else
-          echo "Update needed. Proceeding with update."
-        fi
 
     - name: Update version in build.gradle.kts
       run: |
-        # Increment versionCode and versionName in build.gradle.kts
-        version_code=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
-        version_name=$(grep -oP 'versionName = "\K[0-9\.]+' app/build.gradle.kts)
+        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+          echo "No update needed."
+          exit 0
+        fi
 
-        new_version_code=$((version_code + 1))
-        new_version_name=$(echo $version_name | awk -F. '{$NF++; OFS="."; print}')
+        current_app_version_code=$(grep -oP '^val appVersionCode = \K[0-9]+' app/build.gradle.kts)
+        current_app_version_name=$(grep -oP '^val appVersionName = "\K[0-9\.]+' app/build.gradle.kts)
+        echo "Current appVersionCode: $current_app_version_code"
+        echo "Current appVersionName: $current_app_version_name"
 
+        new_app_version_code=$((current_app_version_code + 1))
+        new_app_version_name=$(echo "$current_app_version_name" | awk -F. -v OFS=. '{$NF++; print}')
+        echo "New appVersionCode: $new_app_version_code"
+        echo "New appVersionName: $new_app_version_name"
 
-        # Update build.gradle.kts with new version
-        sed -i "s/versionCode = $version_code/versionCode = $new_version_code/" app/build.gradle.kts
-        sed -i "s/versionName = \"$version_name\"/versionName = \"$new_version_name\"/" app/build.gradle.kts
-        sed -i "s/buildConfigField(\"String\", \"NpsVersion\", \".*\")/buildConfigField(\"String\", \"NpsVersion\", \"$LATEST_VERSION\")/" app/build.gradle.kts
+        sed -i "s/^val appVersionCode = $current_app_version_code/val appVersionCode = $new_app_version_code/" app/build.gradle.kts
+        sed -i "s/^val appVersionName = \"$current_app_version_name\"/val appVersionName = \"$new_app_version_name\"/" app/build.gradle.kts
+
+        sed -i "s/^val npsVersion = \".*\"/val npsVersion = \"$LATEST_VERSION\"/" app/build.gradle.kts
+
+    - name: Clean jniLibs directory
+      run: |
+        find app/src/main/jniLibs -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 
     - name: Download NPC client binaries
       run: |
@@ -72,9 +72,12 @@ jobs:
         tar -xzf android_arm64_client.tar.gz -C app/src/main/jniLibs/arm64-v8a npc
         tar -xzf linux_amd64_client.tar.gz -C app/src/main/jniLibs/x86_64 npc
 
-        mv app/src/main/jniLibs/armeabi-v7a/npc app/src/main/jniLibs/armeabi-v7a/libnpc.so
-        mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/libnpc.so
-        mv app/src/main/jniLibs/x86_64/npc app/src/main/jniLibs/x86_64/libnpc.so
+        npc_filename=$(grep -oP '^val npcFileName = "\K[^"]+' app/build.gradle.kts | xargs)
+        echo "NPC file name to be used: '$npc_filename'"
+
+        mv app/src/main/jniLibs/armeabi-v7a/npc app/src/main/jniLibs/armeabi-v7a/"$npc_filename"
+        mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/"$npc_filename"
+        mv app/src/main/jniLibs/x86_64/npc app/src/main/jniLibs/x86_64/"$npc_filename"
 
     - name: Commit and push changes
       run: |
@@ -86,6 +89,6 @@ jobs:
           echo "No changes detected, skipping commit."
           exit 0
         else
-          git commit -m "Update NPC to v$LATEST_VERSION"
+          git commit -m "Update NPC to $LATEST_VERSION"
           git push origin main
         fi
