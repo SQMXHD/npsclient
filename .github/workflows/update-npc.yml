@@ -59,6 +59,11 @@ jobs:
 
     - name: Clean jniLibs directory
       run: |
+        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+          echo "No update needed."
+          exit 0
+        fi
+
         if [ ! -d "app/src/main/jniLibs" ]; then
           mkdir -p app/src/main/jniLibs
         else
@@ -67,12 +72,22 @@ jobs:
 
     - name: Download NPC client binaries
       run: |
+        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+          echo "No update needed."
+          exit 0
+        fi
+
         wget https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_client.tar.gz -O linux_arm_v7_client.tar.gz
         wget https://github.com/djylb/nps/releases/latest/download/android_arm64_client.tar.gz -O android_arm64_client.tar.gz
         wget https://github.com/djylb/nps/releases/latest/download/linux_amd64_client.tar.gz -O linux_amd64_client.tar.gz
 
     - name: Extract and rename NPC files
       run: |
+        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+          echo "No update needed."
+          exit 0
+        fi
+
         mkdir -p app/src/main/jniLibs/armeabi-v7a
         mkdir -p app/src/main/jniLibs/arm64-v8a
         mkdir -p app/src/main/jniLibs/x86_64
@@ -90,6 +105,11 @@ jobs:
 
     - name: Commit and push changes
       run: |
+        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+          echo "No update needed."
+          exit 0
+        fi
+
         git config --global user.name "djylb"
         git config --global user.email "duan@d-jy.net"
         git add app/build.gradle.kts app/src/main/jniLibs/*
