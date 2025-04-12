@@ -54,7 +54,11 @@ jobs:
 
     - name: Clean jniLibs directory
       run: |
-        find app/src/main/jniLibs -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        if [ ! -d "app/src/main/jniLibs" ]; then
+          mkdir -p app/src/main/jniLibs
+        else
+          find app/src/main/jniLibs -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        fi
 
     - name: Download NPC client binaries
       run: |
