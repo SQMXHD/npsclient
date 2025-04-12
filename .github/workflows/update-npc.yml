@@ -66,5 +66,5 @@ jobs:
         git config --global user.name "djylb"
         git config --global user.email "duan@d-jy.net"
         git add app/src/main/jniLibs/*
-        git commit -m "Update libnpc.so binaries to $LATEST_VERSION"
+        git commit -m "Update NPC to $LATEST_VERSION"
         git push origin main
