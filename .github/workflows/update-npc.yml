@@ -26,16 +26,35 @@ jobs:
 
     - name: Check if update is needed
       run: |
-        if [ -f app/src/main/jniLibs/version.txt ]; then
-          current_version=$(cat app/src/main/jniLibs/version.txt)
-          echo "Current version in version.txt: $current_version"
-          if [ "$current_version" == "$LATEST_VERSION" ]; then
-            echo "No update needed. The latest version is already installed."
-            exit 0
-          fi
+        # Extract current version from build.gradle.kts
+        current_version=$(grep -oP 'buildConfigField\("String", "NpsVersion", "\K[0-9\.]+' app/build.gradle.kts)
+        echo "Current version from build.gradle.kts: $current_version"
+
+        # Strip the 'v' from latest_version if it exists
+        latest_version_no_v=$(echo "$LATEST_VERSION" | sed 's/^v//')
+        echo "Latest version: $latest_version_no_v"
+
+        if [ "$current_version" == "$latest_version_no_v" ]; then
+          echo "No update needed. The latest version is already installed."
+          exit 0
         else
-          echo "No version file found. Proceeding with the update."
+          echo "Update needed. Proceeding with update."
         fi
+
+    - name: Update version in build.gradle.kts
+      run: |
+        # Increment versionCode and versionName in build.gradle.kts
+        version_code=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
+        version_name=$(grep -oP 'versionName = "\K[0-9\.]+' app/build.gradle.kts)
+
+        new_version_code=$((version_code + 1))
+        new_version_name=$(echo $version_name | awk -F. '{$NF++; OFS="."; print}')
+
+
+        # Update build.gradle.kts with new version
+        sed -i "s/versionCode = $version_code/versionCode = $new_version_code/" app/build.gradle.kts
+        sed -i "s/versionName = \"$version_name\"/versionName = \"$new_version_name\"/" app/build.gradle.kts
+        sed -i "s/buildConfigField(\"String\", \"NpsVersion\", \".*\")/buildConfigField(\"String\", \"NpsVersion\", \"$LATEST_VERSION\")/" app/build.gradle.kts
 
     - name: Download NPC client binaries
       run: |
@@ -57,10 +76,6 @@ jobs:
         mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/libnpc.so
         mv app/src/main/jniLibs/x86_64/npc app/src/main/jniLibs/x86_64/libnpc.so
 
-    - name: Update version file
-      run: |
-        echo "$LATEST_VERSION" > app/src/main/jniLibs/version.txt
-
     - name: Commit and push changes
       run: |
         git config --global user.name "djylb"
@@ -71,6 +86,6 @@ jobs:
           echo "No changes detected, skipping commit."
           exit 0
         else
-          git commit -m "Update NPC to $LATEST_VERSION"
+          git commit -m "Update NPC to v$LATEST_VERSION"
           git push origin main
         fi
