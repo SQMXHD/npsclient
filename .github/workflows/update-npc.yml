@@ -47,9 +47,9 @@ jobs:
         mkdir -p app/src/main/jniLibs/arm64-v8a
         mkdir -p app/src/main/jniLibs/x86_64
 
-        tar -xzf linux_arm_v7_client.tar.gz --strip-components=1 -C app/src/main/jniLibs/armeabi-v7a
-        tar -xzf android_arm64_client.tar.gz --strip-components=1 -C app/src/main/jniLibs/arm64-v8a
-        tar -xzf linux_amd64_client.tar.gz --strip-components=1 -C app/src/main/jniLibs/x86_64
+        tar -xzf linux_arm_v7_client.tar.gz -C app/src/main/jniLibs/armeabi-v7a npc
+        tar -xzf android_arm64_client.tar.gz -C app/src/main/jniLibs/arm64-v8a npc
+        tar -xzf linux_amd64_client.tar.gz -C app/src/main/jniLibs/x86_64 npc
 
         mv app/src/main/jniLibs/armeabi-v7a/npc app/src/main/jniLibs/armeabi-v7a/libnpc.so
         mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/libnpc.so
