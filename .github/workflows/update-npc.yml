@@ -87,7 +87,7 @@ jobs:
       run: |
         git config --global user.name "djylb"
         git config --global user.email "duan@d-jy.net"
-        git add app/src/main/jniLibs/*
+        git add app/build.gradle.kts app/src/main/jniLibs/*
 
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
