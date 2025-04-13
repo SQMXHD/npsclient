@@ -1,7 +1,9 @@
 name: Android CI
 
 on:
-  #push:
+  push:
+    paths:
+      - 'app/src/main/jniLibs/**'
   workflow_dispatch:
   release:
     types: [ published ]
