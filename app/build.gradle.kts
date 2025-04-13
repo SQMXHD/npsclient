@@ -1,3 +1,5 @@
+import java.util.Properties
+
 val appVersionCode = 2
 val appVersionName = "1.0.1"
 val npsVersion = "0.26.45"
@@ -27,6 +29,33 @@ android {
         buildConfigField("String", "NpcFileName", "\"$npcFileName\"")
     }
 
+    signingConfigs {
+        val envKeyAlias = System.getenv("KEY_ALIAS")
+        val envKeyPassword = System.getenv("KEY_PASSWORD")
+        val envStorePassword = System.getenv("STORE_PASSWORD")
+        val envStoreFile = System.getenv("STORE_FILE")
+
+        val fileProps = Properties()
+        val keystorePropertiesFile = rootProject.file("keystore.properties")
+        if (keystorePropertiesFile.exists()) {
+            fileProps.load(keystorePropertiesFile.inputStream())
+        }
+
+        val keyAlias = envKeyAlias ?: fileProps.getProperty("keyAlias")
+        val keyPassword = envKeyPassword ?: fileProps.getProperty("keyPassword")
+        val storePassword = envStorePassword ?: fileProps.getProperty("storePassword")
+        val storeFilePath = if (!envStoreFile.isNullOrBlank()) envStoreFile else fileProps.getProperty("storeFile")
+
+        if (keyAlias != null && keyPassword != null && storePassword != null && storeFilePath != null) {
+            create("release") {
+                storeFile = file(storeFilePath)
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -34,6 +63,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.findByName("release")
         }
     }
     compileOptions {
@@ -47,7 +77,9 @@ android {
         compose = true
         buildConfig = true
     }
-
+    androidResources {
+        generateLocaleConfig = true
+    }
     packaging {
         jniLibs {
             useLegacyPackaging = true
