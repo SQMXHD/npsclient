@@ -43,11 +43,14 @@ android {
         val keyAlias = envKeyAlias ?: fileProps.getProperty("keyAlias")
         val keyPassword = envKeyPassword ?: fileProps.getProperty("keyPassword")
         val storePassword = envStorePassword ?: fileProps.getProperty("storePassword")
-        val storeFilePath = if (!envStoreFile.isNullOrBlank()) envStoreFile else fileProps.getProperty("storeFile")
 
-        if (keyAlias != null && keyPassword != null && storePassword != null && storeFilePath != null) {
+        if (keyAlias != null && keyPassword != null && storePassword != null) {
             create("release") {
-                storeFile = file(storeFilePath)
+                storeFile =
+                    if (!envStoreFile.isNullOrBlank())
+                        file("../keystore.jks")
+                    else
+                        file(fileProps.getProperty("storeFile"))
                 this.storePassword = storePassword
                 this.keyAlias = keyAlias
                 this.keyPassword = keyPassword
