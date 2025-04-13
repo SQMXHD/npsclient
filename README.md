@@ -4,8 +4,6 @@ A NPC client for Android.
 
 一个用于 Android 的 NPC 客户端。
 
-> 该应用仅在NPC代码发生变更时更新，不会追随NPS版本号更新
-
 ---
 
 ## Install / 安装
