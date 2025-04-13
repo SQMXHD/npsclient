@@ -28,7 +28,6 @@ android {
         buildConfigField("String", "NpsVersion", "\"$npsVersion\"")
         buildConfigField("String", "NpcFileName", "\"$npcFileName\"")
     }
-
     signingConfigs {
         val envKeyAlias = System.getenv("KEY_ALIAS")
         val envKeyPassword = System.getenv("KEY_PASSWORD")
@@ -55,7 +54,6 @@ android {
             }
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -67,11 +65,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -85,7 +83,6 @@ android {
             useLegacyPackaging = true
         }
     }
-
     splits {
         abi {
             isEnable = true
