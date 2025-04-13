@@ -1,9 +1,11 @@
 name: Update NPC Files
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
+  #schedule:
+  #  - cron: '0 0 * * *'
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-update-npc]
 
 jobs:
   update-npc:
