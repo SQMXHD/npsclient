@@ -10,6 +10,7 @@ A NPC client for Android.
 - [Google Play](https://play.google.com/store/apps/details?id=com.duanlab.npsclient)
 - [Releases](https://github.com/djylb/npsclient/releases/latest)
 
+---
 
 ## How to Build / 编译方法
 
