@@ -11,7 +11,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -66,16 +65,6 @@ jobs:
       #    path: |
       #      app/build/outputs/apk/release/*.apk
       #      app/build/outputs/bundle/release/*.aab
-
-      - name: Create tag if not exists
-        run: |
-          git fetch --tags
-          if ! git rev-parse "v${{ env.APP_VERSION_NAME }}" >/dev/null 2>&1; then
-            git config --global user.name "djylb"
-            git config --global user.email "duan@d-jy.net"
-            git tag -a "v${{ env.APP_VERSION_NAME }}" -m "Version ${{ env.APP_VERSION_NAME }}"
-            git push origin "v${{ env.APP_VERSION_NAME }}"
-          fi
 
       - name: Upload release files
         uses: softprops/action-gh-release@v2
