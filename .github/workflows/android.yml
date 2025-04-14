@@ -5,6 +5,8 @@ on:
     paths:
       - 'app/src/main/jniLibs/**'
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-build]
   release:
     types: [ published ]
     branches: [ master ]
