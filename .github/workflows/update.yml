@@ -12,118 +12,126 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        ref: main
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget tar jq
+      - name: Set up tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget tar jq
 
-    - name: Get NPS version
-      run: |
-        current_nps_version=$(grep -oP '^val npsVersion = "\K[0-9\.]+' app/build.gradle.kts | xargs)
-        echo "Current NPS version: '$current_nps_version'"
-
-        latest_version=$(curl --silent "https://api.github.com/repos/djylb/nps/releases/latest" | jq -r .tag_name)
-        if [ "$latest_version" = "null" ] || [ -z "$latest_version" ]; then
-          echo "Failed to retrieve remote version, using current version."
-          latest_version_no_v="$current_nps_version"
-        else
-          latest_version_no_v=$(echo "$latest_version" | sed 's/^v//' | xargs)
-        fi
-        echo "Latest NPS version: '$latest_version_no_v'"
-        echo "CURRENT_VERSION=$current_nps_version" >> $GITHUB_ENV
-        echo "LATEST_VERSION=$latest_version_no_v" >> $GITHUB_ENV
+      - name: Get NPS version
+        run: |
+          current_nps_version=$(grep -oP '^val npsVersion = "\K[0-9\.]+' app/build.gradle.kts | xargs)
+          echo "Current NPS version: '$current_nps_version'"
+          
+          latest_version=$(curl --silent "https://api.github.com/repos/djylb/nps/releases/latest" | jq -r .tag_name)
+          if [ "$latest_version" = "null" ] || [ -z "$latest_version" ]; then
+            echo "Failed to retrieve remote version, using current version."
+            latest_version_no_v="$current_nps_version"
+          else
+            latest_version_no_v=$(echo "$latest_version" | sed 's/^v//' | xargs)
+          fi
+          echo "Latest NPS version: '$latest_version_no_v'"
+          echo "CURRENT_VERSION=$current_nps_version" >> $GITHUB_ENV
+          echo "LATEST_VERSION=$latest_version_no_v" >> $GITHUB_ENV
 
 
-    - name: Update version in build.gradle.kts
-      run: |
-        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
-          echo "No update needed."
-          exit 0
-        fi
+      - name: Update version in build.gradle.kts
+        run: |
+          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+            echo "No update needed."
+            exit 0
+          fi
+          
+          current_app_version_code=$(grep -oP '^val appVersionCode = \K[0-9]+' app/build.gradle.kts)
+          current_app_version_name=$(grep -oP '^val appVersionName = "\K[0-9\.]+' app/build.gradle.kts)
+          echo "Current appVersionCode: $current_app_version_code"
+          echo "Current appVersionName: $current_app_version_name"
+          
+          new_app_version_code=$((current_app_version_code + 1))
+          new_app_version_name=$(echo "$current_app_version_name" | awk -F. -v OFS=. '{$NF++; print}')
+          echo "New appVersionCode: $new_app_version_code"
+          echo "New appVersionName: $new_app_version_name"
+          
+          sed -i "s/^val appVersionCode = $current_app_version_code/val appVersionCode = $new_app_version_code/" app/build.gradle.kts
+          sed -i "s/^val appVersionName = \"$current_app_version_name\"/val appVersionName = \"$new_app_version_name\"/" app/build.gradle.kts
+          
+          sed -i "s/^val npsVersion = \".*\"/val npsVersion = \"$LATEST_VERSION\"/" app/build.gradle.kts
 
-        current_app_version_code=$(grep -oP '^val appVersionCode = \K[0-9]+' app/build.gradle.kts)
-        current_app_version_name=$(grep -oP '^val appVersionName = "\K[0-9\.]+' app/build.gradle.kts)
-        echo "Current appVersionCode: $current_app_version_code"
-        echo "Current appVersionName: $current_app_version_name"
+      - name: Clean jniLibs directory
+        run: |
+          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+            echo "No update needed."
+            exit 0
+          fi
+          
+          if [ ! -d "app/src/main/jniLibs" ]; then
+            mkdir -p app/src/main/jniLibs
+          else
+            find app/src/main/jniLibs -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          fi
 
-        new_app_version_code=$((current_app_version_code + 1))
-        new_app_version_name=$(echo "$current_app_version_name" | awk -F. -v OFS=. '{$NF++; print}')
-        echo "New appVersionCode: $new_app_version_code"
-        echo "New appVersionName: $new_app_version_name"
+      - name: Download NPC client binaries
+        run: |
+          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+            echo "No update needed."
+            exit 0
+          fi
+          
+          wget https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_client.tar.gz -O linux_arm_v7_client.tar.gz
+          wget https://github.com/djylb/nps/releases/latest/download/android_arm64_client.tar.gz -O android_arm64_client.tar.gz
+          wget https://github.com/djylb/nps/releases/latest/download/linux_amd64_client.tar.gz -O linux_amd64_client.tar.gz
 
-        sed -i "s/^val appVersionCode = $current_app_version_code/val appVersionCode = $new_app_version_code/" app/build.gradle.kts
-        sed -i "s/^val appVersionName = \"$current_app_version_name\"/val appVersionName = \"$new_app_version_name\"/" app/build.gradle.kts
+      - name: Extract and rename NPC files
+        run: |
+          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+            echo "No update needed."
+            exit 0
+          fi
+          
+          mkdir -p app/src/main/jniLibs/armeabi-v7a
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+          mkdir -p app/src/main/jniLibs/x86_64
+          
+          tar -xzf linux_arm_v7_client.tar.gz -C app/src/main/jniLibs/armeabi-v7a npc
+          tar -xzf android_arm64_client.tar.gz -C app/src/main/jniLibs/arm64-v8a npc
+          tar -xzf linux_amd64_client.tar.gz -C app/src/main/jniLibs/x86_64 npc
+          
+          npc_filename=$(grep -oP '^val npcFileName = "\K[^"]+' app/build.gradle.kts | xargs)
+          echo "NPC file name to be used: '$npc_filename'"
+          
+          mv app/src/main/jniLibs/armeabi-v7a/npc app/src/main/jniLibs/armeabi-v7a/"$npc_filename"
+          mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/"$npc_filename"
+          mv app/src/main/jniLibs/x86_64/npc app/src/main/jniLibs/x86_64/"$npc_filename"
 
-        sed -i "s/^val npsVersion = \".*\"/val npsVersion = \"$LATEST_VERSION\"/" app/build.gradle.kts
+      - name: Commit and push changes
+        run: |
+          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+            echo "No update needed."
+            exit 0
+          fi
+          
+          git config --global user.name "djylb"
+          git config --global user.email "duan@d-jy.net"
+          git add app/build.gradle.kts app/src/main/jniLibs/*
+          
+          if git diff --cached --quiet; then
+            echo "No changes detected, skipping commit."
+            exit 0
+          else
+            git commit -m "Update NPC to $LATEST_VERSION"
+            git push
+          fi
 
-    - name: Clean jniLibs directory
-      run: |
-        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
-          echo "No update needed."
-          exit 0
-        fi
+      - name: Trigger Build
+        run: |
+          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
+            echo "No update needed."
+            exit 0
+          fi
 
-        if [ ! -d "app/src/main/jniLibs" ]; then
-          mkdir -p app/src/main/jniLibs
-        else
-          find app/src/main/jniLibs -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-        fi
-
-    - name: Download NPC client binaries
-      run: |
-        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
-          echo "No update needed."
-          exit 0
-        fi
-
-        wget https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_client.tar.gz -O linux_arm_v7_client.tar.gz
-        wget https://github.com/djylb/nps/releases/latest/download/android_arm64_client.tar.gz -O android_arm64_client.tar.gz
-        wget https://github.com/djylb/nps/releases/latest/download/linux_amd64_client.tar.gz -O linux_amd64_client.tar.gz
-
-    - name: Extract and rename NPC files
-      run: |
-        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
-          echo "No update needed."
-          exit 0
-        fi
-
-        mkdir -p app/src/main/jniLibs/armeabi-v7a
-        mkdir -p app/src/main/jniLibs/arm64-v8a
-        mkdir -p app/src/main/jniLibs/x86_64
-
-        tar -xzf linux_arm_v7_client.tar.gz -C app/src/main/jniLibs/armeabi-v7a npc
-        tar -xzf android_arm64_client.tar.gz -C app/src/main/jniLibs/arm64-v8a npc
-        tar -xzf linux_amd64_client.tar.gz -C app/src/main/jniLibs/x86_64 npc
-
-        npc_filename=$(grep -oP '^val npcFileName = "\K[^"]+' app/build.gradle.kts | xargs)
-        echo "NPC file name to be used: '$npc_filename'"
-
-        mv app/src/main/jniLibs/armeabi-v7a/npc app/src/main/jniLibs/armeabi-v7a/"$npc_filename"
-        mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/"$npc_filename"
-        mv app/src/main/jniLibs/x86_64/npc app/src/main/jniLibs/x86_64/"$npc_filename"
-
-    - name: Commit and push changes
-      run: |
-        if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
-          echo "No update needed."
-          exit 0
-        fi
-
-        git config --global user.name "djylb"
-        git config --global user.email "duan@d-jy.net"
-        git add app/build.gradle.kts app/src/main/jniLibs/*
-
-        if git diff --cached --quiet; then
-          echo "No changes detected, skipping commit."
-          exit 0
-        else
-          git commit -m "Update NPC to $LATEST_VERSION"
-          #git push origin main
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git HEAD:main
-        fi
+          curl -X POST https://api.github.com/repos/${{ github.repository }}/dispatches \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+            -d '{"event_type":"trigger-build"}'
