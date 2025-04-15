@@ -75,11 +75,7 @@ jobs:
 
       - name: Extract and rename NPC files
         run: |
-          if [ "$CURRENT_VERSION" == "$LATEST_VERSION" ]; then
-            echo "No update needed."
-            exit 0
-          fi
-          
+          mkdir -p app/src/main/jniLibs
           mkdir -p app/src/main/jniLibs/armeabi-v7a
           mkdir -p app/src/main/jniLibs/arm64-v8a
           mkdir -p app/src/main/jniLibs/x86_64
