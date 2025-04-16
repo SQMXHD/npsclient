@@ -30,7 +30,8 @@ class ShellThread(
                         line?.let { outputCallback(it) }
                     }
                 } catch (e: InterruptedIOException) {
-                    outputCallback("Thread interrupted: ${e.message}")
+                    //outputCallback("Thread interrupted: ${e.message}")
+                    outputCallback("Thread interrupted.")
                 }
             }
 

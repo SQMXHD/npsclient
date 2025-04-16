@@ -61,7 +61,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private lateinit var preferences: SharedPreferences
     private val defaultCmd =
-        "-server=xxx:123 -vkey=your_key_here -type=tcp -tls_enable=false -log_level=6"
+        "-server=xxx:123 -vkey=your_key_here -type=tls -log_level=6"
 
     private var cmdTextState = mutableStateOf("")
     private var autoStartState = mutableStateOf(false)
@@ -203,6 +203,9 @@ class MainActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
+                            if (cmdTextState.value.isEmpty()) {
+                                cmdTextState.value = defaultCmd
+                            }
                             preferences.edit().putString(PreferencesKey.CMD_STR, cmdTextState.value)
                                 .apply()
                             if (shellRunningState.value) {
