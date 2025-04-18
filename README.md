@@ -9,6 +9,7 @@ A NPC client for Android.
 ## Install / 安装
 - [Google Play](https://play.google.com/store/apps/details?id=com.duanlab.npsclient)
 - [Releases](https://github.com/djylb/npsclient/releases/latest)
+- [Magisk Module](https://github.com/djylb/npsclient-magisk)
 
 ---
 
