@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'app/src/main/jniLibs/**'
+      - 'app/build.gradle.kts'
   workflow_dispatch:
   repository_dispatch:
     types: [trigger-build]
