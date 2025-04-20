@@ -87,10 +87,10 @@ class ShellService : LifecycleService() {
         val ainfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_SHARED_LIBRARY_FILES)
 
         val cmdArgs = mutableListOf<String>()
-        if (config.cmdstr.contains(" nat")) {
+        if (config.cmdstr.contains(" nat") || config.cmdstr.startsWith("nat")) {
             cmdArgs.add("nat")
         }
-        if (config.cmdstr.contains(" register")) {
+        if (config.cmdstr.contains("register ")) {
             cmdArgs.add("register")
         }
 
