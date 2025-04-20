@@ -85,6 +85,15 @@ class ShellService : LifecycleService() {
     private fun startNps(config: NpsConfig) {
         Log.d("ShellService", "start config: $config")
         val ainfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_SHARED_LIBRARY_FILES)
+
+        val cmdArgs = mutableListOf<String>()
+        if (config.cmdstr.contains(" nat")) {
+            cmdArgs.add("nat")
+        }
+        if (config.cmdstr.contains(" register")) {
+            cmdArgs.add("register")
+        }
+
         val args = config.cmdstr
             .split(" ")
             .map { it.trim() }
@@ -98,7 +107,7 @@ class ShellService : LifecycleService() {
         }
         val nativeLibPath = ainfo.nativeLibraryDir
         val binary = "$nativeLibPath/${BuildConfig.NpcFileName}"
-        val commandList = listOf(binary) + args
+        val commandList = listOf(binary) + cmdArgs + args
         Log.d("ShellService", "Command: ${commandList.joinToString(" ")}")
         try {
             val thread = runCommand(commandList, filesDir)
