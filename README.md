@@ -2,7 +2,7 @@
 
 A NPC client for Android.
 
-一个用于 Android 的 NPC 客户端。
+一个用于 Android 的 [NPC](https://github.com/djylb/nps) 客户端。
 
 ---
 
