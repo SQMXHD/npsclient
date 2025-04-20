@@ -4,7 +4,7 @@ A NPC client for Android.
 
 一个用于 Android 的 [NPC](https://github.com/djylb/nps) 客户端。
 
-**讨论交流：**  [Telegram](https://t.me/npsdev)。
+**讨论交流：**  [Telegram](https://t.me/npsdev)
 
 ---
 
