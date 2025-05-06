@@ -105,6 +105,9 @@ class ShellService : LifecycleService() {
         if (args.none { it.startsWith("-log=") }) {
             args.add("-log=stdout")
         }
+        if (args.none { it.startsWith("-log_color=") }) {
+            args.add("-log_color=false")
+        }
         val nativeLibPath = ainfo.nativeLibraryDir
         val binary = "$nativeLibPath/${BuildConfig.NpcFileName}"
         val commandList = listOf(binary) + cmdArgs + args
