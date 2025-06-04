@@ -72,6 +72,7 @@ jobs:
           wget https://github.com/djylb/nps/releases/latest/download/linux_arm_v7_client.tar.gz -O linux_arm_v7_client.tar.gz
           wget https://github.com/djylb/nps/releases/latest/download/android_arm64_client.tar.gz -O android_arm64_client.tar.gz
           wget https://github.com/djylb/nps/releases/latest/download/linux_amd64_client.tar.gz -O linux_amd64_client.tar.gz
+          wget https://github.com/djylb/nps/releases/latest/download/linux_386_client.tar.gz -O linux_386_client.tar.gz
 
       - name: Extract and rename NPC files
         run: |
@@ -79,17 +80,20 @@ jobs:
           mkdir -p app/src/main/jniLibs/armeabi-v7a
           mkdir -p app/src/main/jniLibs/arm64-v8a
           mkdir -p app/src/main/jniLibs/x86_64
-          
+          mkdir -p app/src/main/jniLibs/x86
+
           tar -xzf linux_arm_v7_client.tar.gz -C app/src/main/jniLibs/armeabi-v7a npc
           tar -xzf android_arm64_client.tar.gz -C app/src/main/jniLibs/arm64-v8a npc
           tar -xzf linux_amd64_client.tar.gz -C app/src/main/jniLibs/x86_64 npc
-          
+          tar -xzf linux_386_client.tar.gz -C app/src/main/jniLibs/x86 npc
+
           npc_filename=$(grep -oP '^val npcFileName = "\K[^"]+' app/build.gradle.kts | xargs)
           echo "NPC file name to be used: '$npc_filename'"
-          
+
           mv app/src/main/jniLibs/armeabi-v7a/npc app/src/main/jniLibs/armeabi-v7a/"$npc_filename"
           mv app/src/main/jniLibs/arm64-v8a/npc app/src/main/jniLibs/arm64-v8a/"$npc_filename"
           mv app/src/main/jniLibs/x86_64/npc app/src/main/jniLibs/x86_64/"$npc_filename"
+          mv app/src/main/jniLibs/x86/npc app/src/main/jniLibs/x86/"$npc_filename"
 
       - name: Commit and push changes
         run: |
