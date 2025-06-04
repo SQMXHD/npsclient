@@ -33,6 +33,7 @@ A NPC client for Android.
    app/src/main/jniLibs/armeabi-v7a/libnpc.so
    app/src/main/jniLibs/arm64-v8a/libnpc.so
    app/src/main/jniLibs/x86_64/libnpc.so
+   app/src/main/jniLibs/x86/libnpc.so
    ```
 
 3. Open with Android Studio and build.
