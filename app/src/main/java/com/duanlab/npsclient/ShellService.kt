@@ -93,9 +93,6 @@ class ShellService : LifecycleService() {
         if (config.cmdstr.contains("register ")) {
             cmdArgs.add("register")
         }
-        if (config.cmdstr.contains(" update") || config.cmdstr.startsWith("update")) {
-            cmdArgs.add("update")
-        }
 
         val args = config.cmdstr
             .split(" ")
