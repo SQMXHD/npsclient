@@ -93,11 +93,23 @@ class ShellService : LifecycleService() {
         if (config.cmdstr.contains("register ")) {
             cmdArgs.add("register")
         }
+        if (config.cmdstr.contains("status ")) {
+            cmdArgs.add("status")
+        }
 
         val args = config.cmdstr
             .split(" ")
             .map { it.trim() }
             .filter { it.startsWith("-") }
+            .map { arg ->
+                if ('=' in arg) {
+                    val (key, raw) = arg.split("=", limit = 2)
+                    val v = raw.trim().trim('"', '\'')
+                    "$key=$v"
+                } else {
+                    arg
+                }
+            }
             .toMutableList()
         if (args.none { it.startsWith("-debug=") }) {
             args.add("-debug=false")
